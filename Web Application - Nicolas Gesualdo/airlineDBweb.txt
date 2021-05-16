@@ -1,0 +1,105 @@
+drop database airlineDB;
+create database airlineDB;
+
+CREATE TABLE Airline(
+	AirlineCode CHAR(2) NOT NULL,
+	AirlineName VARCHAR(20) NOT NULL,
+	PRIMARY KEY(AirlineCode));
+
+CREATE TABLE AirplaneType(
+	TypeName VARCHAR(20) NOT NULL,
+	MaxSeats INTEGER,
+	Company VARCHAR(20) NOT NULL,
+	PRIMARY KEY(TypeName));
+
+CREATE TABLE Airport(
+	AirportCode CHAR(3) NOT NULL,
+	City VARCHAR(30) NOT NULL,
+	Province VARCHAR(30) NOT NULL,
+	AirportName VARCHAR(40) NOT NULL,
+	PRIMARY KEY(AirportCode));
+
+CREATE TABLE Airplane(
+	AirplaneID VARCHAR(10) NOT NULL,
+	YearBuilt YEAR(4) NOT NULL,
+	ALCode CHAR(2) NOT NULL, 
+	PlaneTypeName VARCHAR(20) NOT NULL,	
+	PRIMARY KEY(AirplaneID),
+	FOREIGN KEY(PlaneTypeName) REFERENCES AirplaneType(TypeName) ON DELETE RESTRICT,
+	FOREIGN KEY(ALCode) REFERENCES Airline(AirlineCode) ON DELETE CASCADE);
+
+CREATE TABLE Flight(
+	FlightNumber CHAR(3) NOT NULL,
+	ALCode CHAR(2) NOT NULL,
+	SchedDeparture TIME NOT NULL,
+	SchedArrival TIME NOT NULL,
+	PlaneID VARCHAR(10),		
+	DeparturePortCode CHAR(3) NOT NULL,
+	ArrivalPortCode CHAR(3) NOT NULL,
+	ActualDeparture TIME,					
+	ActualArrival TIME,			
+	PRIMARY KEY(FlightNumber, ALCode),
+	FOREIGN KEY(ALCode) REFERENCES Airline(AirlineCode) ON DELETE CASCADE,
+	FOREIGN KEY(PlaneID) REFERENCES Airplane(AirplaneID) ON DELETE SET NULL,
+	FOREIGN KEY(DeparturePortCode) REFERENCES Airport(AirportCode) ON DELETE CASCADE,
+	FOREIGN KEY(ArrivalPortCode) REFERENCES Airport(AirportCode) ON DELETE CASCADE);
+
+CREATE TABLE Accepts(
+	PlaneTypeName VARCHAR(20) NOT NULL,
+	PortCode CHAR(3) NOT NULL,
+	PRIMARY KEY(PlaneTypeName, PortCode),
+	FOREIGN KEY(PlaneTypeName) REFERENCES AirplaneType(TypeName) ON DELETE CASCADE,
+	FOREIGN KEY(PortCode) REFERENCES Airport(AirportCode) ON DELETE CASCADE);
+
+CREATE TABLE DayOfTheWeek(
+	FlightNum CHAR(3) NOT NULL,
+	ALCode CHAR(2) NOT NULL,
+	DayOfWeek VARCHAR(10) NOT NULL,
+	PRIMARY KEY(FlightNum, ALCode, DayOfWeek),
+	FOREIGN KEY(FlightNum, ALCode) REFERENCES Flight(FlightNumber, ALCode) ON DELETE CASCADE);
+
+insert into Airline values
+('AC','Air Canada'),
+('WS','West Jet'),
+('DL','Delta');
+
+insert into AirplaneType values
+('737',150,'Boeing'),
+('A380',200,'Airbus'),
+('737max',170,'Boeing');
+
+insert into Airplane values
+('1a1a',2010,'AC','737'),
+('1a2b',2014,'WS','737max'),
+('1a3c',2017,'AC','A380');
+
+insert into Airport values
+('YYZ','Toronto','Ontario','Pearson International Airport'),
+('YYC','Calgary','Alberta','Calgary International Airport'),
+('YVR','Vancouver','British Columbia','Vancouver International Airport');
+
+insert into Flight values
+('001','AC','08:30:00','13:30:0','1a1a','YYZ','YYC','08:36:00','13:38:0'),
+('002','WS','06:30:00','11:30:0','1a3c','YVR','YYZ','06:30:00','11:20:0'),
+('001','DL','07:30:00','12:30:0','1a1a','YVR','YYC','07:30:00','12:30:0'),
+('003','DL','07:30:00','12:30:0','1a1a','YVR','YYC',NULL,NULL),
+('004','AC','07:30:00','13:30:0','1a1a','YYZ','YVR','07:30:00','13:30:0');
+
+insert into Accepts values
+('737','YYZ'),
+('A380','YYZ'),
+('A380','YVR'),
+('737max','YVR');
+
+insert into DayOfTheWeek values
+('001','AC','Thursday'),
+('001','AC','Wednesday'),
+('002','WS','Monday'),
+('002','WS','Sunday'),
+('003','DL','Tuesday'),
+('004','AC','Monday'),
+('001','DL','Sunday');
+
+
+
+
